@@ -1,6 +1,6 @@
 {
   "name": "protobufjs-dota",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Protocol Buffers for Dota2. This is fork of protobufjs",
   "author": "Vlad Poshvaniuk <vladlovedance@gmail.com>",
   "contributors": [
@@ -31,14 +31,14 @@
     "ascli": "~1",
     "bytebuffer": "~5",
     "glob": "^7.0.5",
+    "google-closure-compiler": "^20221102.0.1",
     "yargs": "^3.10.0"
   },
   "devDependencies": {
-    "testjs": "~1 >=1.0.4",
     "fixture-stdout": "^0.2.1",
+    "jsdoc": "~3.3.0-alpha10",
     "metascript": ">=0.18 <1",
-    "closurecompiler": "~1",
-    "jsdoc": "~3.3.0-alpha10"
+    "testjs": "~1 >=1.0.4"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -55,8 +55,8 @@
     "build": "node scripts/build.js",
     "descriptor2json": "node bin/pbjs src/google/protobuf/descriptor.proto --target=json > src/google/protobuf/descriptor.json",
     "compile": "npm run-script compile-full && npm run-script compile-light",
-    "compile-full": "ccjs dist/protobuf.js --create_source_map=dist/protobuf.min.map --compilation_level=SIMPLE_OPTIMIZATIONS > dist/protobuf.min.js",
-    "compile-light": "ccjs dist/protobuf-light.js --create_source_map=dist/protobuf-light.min.map --compilation_level=SIMPLE_OPTIMIZATIONS > dist/protobuf-light.min.js",
+    "compile-full": "google-closure-compiler dist/protobuf.js --create_source_map=dist/protobuf.min.map --compilation_level=SIMPLE_OPTIMIZATIONS > dist/protobuf.min.js",
+    "compile-light": "google-closure-compiler dist/protobuf-light.js --create_source_map=dist/protobuf-light.min.map --compilation_level=SIMPLE_OPTIMIZATIONS > dist/protobuf-light.min.js",
     "compress": "npm run-script compress-full && npm run-script compress-light",
     "compress-full": "gzip -c -9 dist/protobuf.min.js > dist/protobuf.min.js.gz",
     "compress-light": "gzip -c -9 dist/protobuf-light.min.js > dist/protobuf-light.min.js.gz",

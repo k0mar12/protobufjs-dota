@@ -2314,8 +2314,6 @@
                 wireType = tag & 0x07;
                 id = tag >>> 3;
                 if (wireType === ProtoBuf.WIRE_TYPES.ENDGROUP) {
-                    if (id !== expectedGroupEndId)
-                        throw Error("Illegal group end indicator for "+this.toString(true)+": "+id+" ("+(expectedGroupEndId ? expectedGroupEndId+" expected" : "not a group")+")");
                     break;
                 }
                 if (!(field = this._fieldsById[id])) {
@@ -2343,21 +2341,33 @@
                     continue;
                 }
                 if (field.repeated && !field.options["packed"]) {
-                    msg[field.name].push(field.decode(wireType, buffer));
+                    try {
+                        msg[field.name].push(field.decode(wireType, buffer));
+                    } catch (e) {
+                        msg[field.name].push("Undecoded");
+                    }
                 } else if (field.map) {
-                    var keyval = field.decode(wireType, buffer);
-                    msg[field.name].set(keyval[0], keyval[1]);
+                    try {
+                        var keyval = field.decode(wireType, buffer);
+                        msg[field.name].set(keyval[0], keyval[1]);
+                    } catch (e) {
+                        msg[field.name] = "Undecoded";
+                    }
                 } else {
-                    msg[field.name] = field.decode(wireType, buffer);
-                    if (field.oneof) { // Field is part of an OneOf (not a virtual OneOf field)
-                        var currentField = msg[field.oneof.name]; // Virtual field references currently set field
-                        if (currentField !== null && currentField !== field.name)
-                            msg[currentField] = null; // Clear currently set field
-                        msg[field.oneof.name] = field.name; // Point virtual field at this field
+                    try {
+                        msg[field.name] = field.decode(wireType, buffer);
+                        if (field.oneof) { // Field is part of an OneOf (not a virtual OneOf field)
+                            var currentField = msg[field.oneof.name]; // Virtual field references currently set field
+                            if (currentField !== null && currentField !== field.name)
+                                msg[currentField] = null; // Clear currently set field
+                            msg[field.oneof.name] = field.name; // Point virtual field at this field
+                        }
+                    } catch (e) {
+                        msg[field.name] = "Undecoded";
                     }
                 }
             }
-
+        
             // Check if all required fields are present and set default values for optional fields that are not
             for (var i=0, k=this._fields.length; i<k; ++i) {
                 field = this._fields[i];
@@ -2374,6 +2384,7 @@
             }
             return msg;
         };
+        
 
         /**
          * @alias ProtoBuf.Reflect.Message
